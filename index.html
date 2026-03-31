@@ -24,8 +24,6 @@
             color: #ffffff;
             -webkit-font-smoothing: antialiased;
             user-select: none;
-            /* Stellt sicher, dass der Inhalt nicht hinter die Notch rutscht */
-            padding-top: env(safe-area-inset-top);
         }
         [v-cloak] { display: none; }
         .glass { background: rgba(28, 28, 30, 0.8); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1); }
@@ -68,8 +66,7 @@
     <div v-else class="max-w-xl mx-auto min-h-screen pb-32">
         
         <!-- NAVBAR -->
-        <!-- pt-14 wird durch dynamic padding für Notch ergänzt -->
-        <header class="sticky top-0 z-40 bg-black/60 backdrop-blur-xl px-6 pt-14 pb-4 flex justify-between items-center" style="padding-top: calc(env(safe-area-inset-top) + 1.5rem)">
+        <header class="sticky top-0 z-40 bg-black/60 backdrop-blur-xl px-6 pt-14 pb-4 flex justify-between items-center">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight">Übersicht</h1>
                 <p class="text-blue-500 font-bold text-xs uppercase tracking-widest mt-1">{{ currentFullDate }}</p>
@@ -77,9 +74,7 @@
             <div class="flex gap-2">
                 <!-- VIEW SWITCHER -->
                 <button @click="toggleView" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-400">
-                    <!-- v-if sorgt dafür, dass das Icon im DOM komplett ersetzt wird, was bei PWAs zuverlässiger ist -->
-                    <i v-if="viewMode === 'list'" data-lucide="calendar" class="w-5 h-5"></i>
-                    <i v-else data-lucide="layout-list" class="w-5 h-5"></i>
+                    <i :data-lucide="viewMode === 'list' ? 'calendar' : 'layout-list'" class="w-5 h-5"></i>
                 </button>
                 <button @click="handleLogout" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-400">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
@@ -256,7 +251,6 @@
             const showModal = ref(false);
             const isEditing = ref(false);
             const activeTask = ref({ title: '', startTime: '', endTime: '', description: '' });
-            
             const viewMode = ref('list');
 
             const icons = () => nextTick(() => lucide.createIcons());
@@ -292,6 +286,7 @@
             };
 
             const toggleTask = async (task) => {
+                // Vibration beim Abhaken
                 if ("vibrate" in navigator) navigator.vibrate(25);
                 const taskRef = doc(db, "tasks", task.id);
                 await updateDoc(taskRef, { completed: !task.completed });
@@ -363,48 +358,9 @@
                 await batch.commit();
             };
 
+            // WÖCHENTLICHER RESET (ISO-Woche wechselt Mo 00:00)
             const checkReset = async () => {
                 const now = new Date();
                 const weekKey = `${now.getFullYear()}-${getWeek(now)}`;
                 if (localStorage.getItem('focus_reset') !== weekKey) {
-                    const batch = writeBatch(db);
-                    tasks.value.forEach(t => { if (t.completed) batch.update(doc(db, "tasks", t.id), { completed: false }); });
-                    await batch.commit();
-                    localStorage.setItem('focus_reset', weekKey);
-                }
-            };
-
-            function getWeek(d) {
-                d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-                d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-                return Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7);
-            }
-
-            const handleLogin = async () => {
-                loading.value = true;
-                try { await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value); }
-                catch (e) { alert("Fehler: " + e.message); }
-                finally { loading.value = false; }
-            };
-
-            const handleLogout = () => signOut(auth);
-
-            const filteredTasks = computed(() => {
-                return tasks.value
-                    .filter(t => t.day === selectedDay.value)
-                    .sort((a, b) => a.startTime.localeCompare(b.startTime));
-            });
-
-            const currentFullDate = computed(() => new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long' }).format(new Date()));
-
-            return { 
-                user, loginEmail, loginPassword, loading, handleLogin, handleLogout,
-                days, selectedDay, filteredTasks, currentFullDate,
-                showModal, isEditing, activeTask, viewMode, toggleView,
-                toggleTask, saveTask, openEditModal, openAddModal, closeModal, deleteTask, importWorkflow 
-            };
-        }
-    }).mount('#app');
-</script>
-</body>
-</html>
+                    c
