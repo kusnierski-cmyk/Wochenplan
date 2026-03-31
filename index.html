@@ -363,4 +363,44 @@
                 const now = new Date();
                 const weekKey = `${now.getFullYear()}-${getWeek(now)}`;
                 if (localStorage.getItem('focus_reset') !== weekKey) {
-                    c
+                    const batch = writeBatch(db);
+                    tasks.value.forEach(t => { if (t.completed) batch.update(doc(db, "tasks", t.id), { completed: false }); });
+                    await batch.commit();
+                    localStorage.setItem('focus_reset', weekKey);
+                }
+            };
+
+            function getWeek(d) {
+                d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+                d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+                return Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7);
+            }
+
+            const handleLogin = async () => {
+                loading.value = true;
+                try { await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value); }
+                catch (e) { alert("Fehler: " + e.message); }
+                finally { loading.value = false; }
+            };
+
+            const handleLogout = () => signOut(auth);
+
+            const filteredTasks = computed(() => {
+                return tasks.value
+                    .filter(t => t.day === selectedDay.value)
+                    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+            });
+
+            const currentFullDate = computed(() => new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long' }).format(new Date()));
+
+            return { 
+                user, loginEmail, loginPassword, loading, handleLogin, handleLogout,
+                days, selectedDay, filteredTasks, currentFullDate,
+                showModal, isEditing, activeTask, viewMode, toggleView,
+                toggleTask, saveTask, openEditModal, openAddModal, closeModal, deleteTask, importWorkflow 
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
