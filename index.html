@@ -24,6 +24,8 @@
             color: #ffffff;
             -webkit-font-smoothing: antialiased;
             user-select: none;
+            /* Stellt sicher, dass der Inhalt nicht hinter die Notch rutscht */
+            padding-top: env(safe-area-inset-top);
         }
         [v-cloak] { display: none; }
         .glass { background: rgba(28, 28, 30, 0.8); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1); }
@@ -66,7 +68,8 @@
     <div v-else class="max-w-xl mx-auto min-h-screen pb-32">
         
         <!-- NAVBAR -->
-        <header class="sticky top-0 z-40 bg-black/60 backdrop-blur-xl px-6 pt-14 pb-4 flex justify-between items-center">
+        <!-- pt-14 wird durch dynamic padding für Notch ergänzt -->
+        <header class="sticky top-0 z-40 bg-black/60 backdrop-blur-xl px-6 pt-14 pb-4 flex justify-between items-center" style="padding-top: calc(env(safe-area-inset-top) + 1.5rem)">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight">Übersicht</h1>
                 <p class="text-blue-500 font-bold text-xs uppercase tracking-widest mt-1">{{ currentFullDate }}</p>
@@ -74,7 +77,9 @@
             <div class="flex gap-2">
                 <!-- VIEW SWITCHER -->
                 <button @click="toggleView" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-400">
-                    <i :data-lucide="viewMode === 'list' ? 'calendar' : 'layout-list'" class="w-5 h-5"></i>
+                    <!-- v-if sorgt dafür, dass das Icon im DOM komplett ersetzt wird, was bei PWAs zuverlässiger ist -->
+                    <i v-if="viewMode === 'list'" data-lucide="calendar" class="w-5 h-5"></i>
+                    <i v-else data-lucide="layout-list" class="w-5 h-5"></i>
                 </button>
                 <button @click="handleLogout" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-400">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
@@ -252,7 +257,6 @@
             const isEditing = ref(false);
             const activeTask = ref({ title: '', startTime: '', endTime: '', description: '' });
             
-            // NEU: View Mode State
             const viewMode = ref('list');
 
             const icons = () => nextTick(() => lucide.createIcons());
@@ -288,7 +292,6 @@
             };
 
             const toggleTask = async (task) => {
-                // VIBRATION BEIM ABHAKEN
                 if ("vibrate" in navigator) navigator.vibrate(25);
                 const taskRef = doc(db, "tasks", task.id);
                 await updateDoc(taskRef, { completed: !task.completed });
