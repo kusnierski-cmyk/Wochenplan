@@ -37,14 +37,13 @@
         .list-move, .list-enter-active, .list-leave-active { transition: all 0.4s ease; }
         .list-enter-from, .list-leave-to { opacity: 0; transform: translateY(15px); }
 
-        /* GLOBAL GOLD/WHITE MODE REFINEMENT */
-        .light-mode { background-color: #ffffff !important; color: #000000 !important; }
-        .light-mode #app { background-color: #ffffff !important; color: #000000 !important; }
-        .light-mode .glass { background: rgba(245, 245, 245, 0.9) !important; border: 1px solid rgba(0,0,0,0.1) !important; color: #000000 !important; }
-        .light-mode input, .light-mode textarea { background: #f2f2f7 !important; color: #000000 !important; border: 1px solid rgba(0,0,0,0.1) !important; }
-        .light-mode .day-active { background-color: #000000 !important; color: #ffffff !important; }
+        /* NEUES GOLD-WEISS DESIGN (LIGHT MODE) */
+        .light-mode { background-color: #ffffff !important; color: #000000 !important; min-height: 100vh; }
+        .light-mode .glass { background: rgba(245, 245, 247, 0.8) !important; border: 1px solid rgba(0,0,0,0.08) !important; color: #000000 !important; }
+        .light-mode input, .light-mode textarea { background: #f2f2f7 !important; color: #000000 !important; border: 1px solid rgba(0,0,0,0.05) !important; }
+        .light-mode .day-active { background-color: #D4AF37 !important; color: #ffffff !important; }
         
-        /* Gold Overrides für alle blauen Elemente */
+        /* Gold-Ersetzungen für Blau */
         .light-mode .bg-blue-600 { background-color: #D4AF37 !important; }
         .light-mode .bg-blue-500 { background-color: #D4AF37 !important; }
         .light-mode .text-blue-500, .light-mode .text-blue-600 { color: #D4AF37 !important; }
@@ -53,24 +52,19 @@
         .light-mode .shadow-blue-600\/40 { box-shadow: 0 20px 40px -10px rgba(212, 175, 55, 0.5) !important; }
         .light-mode .bg-blue-600\/20 { background-color: rgba(212, 175, 55, 0.15) !important; }
         .light-mode .border-blue-500\/30 { border-color: rgba(212, 175, 55, 0.3) !important; }
-        
-        /* Kontrast-Anpassungen für Texte */
-        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode p, .light-mode span, .light-mode td, .light-mode th { color: #000000 !important; }
-        .light-mode .text-zinc-400, .light-mode .text-zinc-500, .light-mode .text-zinc-700 { color: #444444 !important; }
-        .light-mode .text-white { color: #ffffff !important; } /* Weißer Text auf Gold-Buttons bleibt weiß */
-        
-        /* Weitere UI Elemente */
+
+        /* Kontrast-Anpassungen */
+        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode p, .light-mode span { color: #000000 !important; }
+        .light-mode .text-zinc-400, .light-mode .text-zinc-500, .light-mode .text-zinc-700 { color: #555555 !important; }
+        .light-mode .text-white { color: #ffffff !important; }
         .light-mode header { background-color: rgba(255, 255, 255, 0.8) !important; }
-        .light-mode .bg-black { background-color: #ffffff !important; }
         .light-mode .bg-zinc-900\/90 { background-color: rgba(255, 255, 255, 0.95) !important; color: #000000 !important; }
         .light-mode .sticky { background-color: rgba(255, 255, 255, 0.95) !important; }
-        /* Re-Exception für Gold-Labels */
-        .light-mode .text-blue-500 { color: #D4AF37 !important; }
     </style>
 </head>
-<body :class="{ 'light-mode': !isDark }">
+<body>
 
-<div id="app" v-cloak class="min-h-screen transition-colors">
+<div id="app" v-cloak :class="{ 'light-mode': !isDark }" class="min-h-screen transition-colors">
     
     <!-- LOGIN -->
     <div v-if="!user" class="min-h-screen flex items-center justify-center p-8 transition-colors">
