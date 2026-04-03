@@ -154,7 +154,7 @@
             <!-- VIEW 2: TABLE/CALENDAR VIEW (SINGLE DAY) -->
             <div v-else-if="viewMode === 'table'" class="space-y-4">
                 <div class="flex justify-end px-2">
-                    <button @click="viewMode = 'weekly'; icons();" class="text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white px-5 py-2.5 rounded-full shadow-lg active:scale-95 transition-all">
+                    <button @click="viewMode = 'weekly'; showFullWeek = true; icons();" class="text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white px-5 py-2.5 rounded-full shadow-lg active:scale-95 transition-all">
                         Ganze Woche
                     </button>
                 </div>
@@ -195,34 +195,43 @@
                 </div>
             </div>
 
-            <!-- VIEW 3: WEEKLY FULL TABLE -->
-            <div v-else-if="viewMode === 'weekly'" class="glass rounded-[2.2rem] overflow-x-auto no-scrollbar">
-                <table class="w-full text-left border-collapse min-w-[750px] table-fixed">
-                    <thead>
-                        <tr class="border-b border-white/10">
-                            <th class="p-3 w-20 text-[9px] font-black text-zinc-500 uppercase sticky left-0 z-10 transition-colors bg-zinc-900/90">Zeit</th>
-                            <th v-for="(day, idx) in days" :key="idx" class="p-3 text-[9px] font-black text-zinc-500 uppercase text-center border-l border-white/5" :class="{'text-blue-500': selectedDay === idx}">{{day}}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="h in [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]" :key="h" class="border-b border-white/5 h-24">
-                            <td class="p-2 text-[10px] font-bold text-zinc-500 sticky left-0 z-10 transition-colors bg-zinc-900/90">{{h}}:00</td>
-                            <td v-for="(d, idx) in 7" :key="idx" 
-                                @click="openAddModalAt(idx, h)"
-                                class="p-1 border-l border-white/5 align-top active:bg-blue-500/5 transition-colors cursor-pointer">
-                                <div v-for="task in getTasksByDayAndHour(idx, h)" :key="task.id" 
-                                     @click.stop="openEditModal(task)"
-                                     class="mb-1 p-2 rounded-xl bg-blue-600/20 border border-blue-500/30 text-[10px] relative transition-opacity"
-                                     :class="{'opacity-30': task.completed}">
-                                    <div class="font-bold truncate" :class="{'line-through': task.completed}">{{ task.title }}</div>
-                                    <div @click.stop="toggleTask(task)" class="absolute top-1 right-1 w-4 h-4 rounded-full border border-white/30 flex items-center justify-center" :class="{'bg-blue-500 border-blue-500': task.completed}">
-                                        <svg v-if="task.completed" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" class="w-2.5 h-2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <!-- VIEW 3: WEEKLY FULL TABLE / SPALTENANSICHT -->
+            <div v-else-if="viewMode === 'weekly'" class="space-y-4">
+                <div class="flex justify-end px-2" v-if="!showFullWeek">
+                    <button @click="showFullWeek = true; icons();" class="text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white px-5 py-2.5 rounded-full shadow-lg active:scale-95 transition-all">
+                        Ganze Woche
+                    </button>
+                </div>
+                <div class="glass rounded-[2.2rem] overflow-x-auto no-scrollbar">
+                    <table class="w-full text-left border-collapse table-fixed" :class="showFullWeek ? 'min-w-[750px]' : 'min-w-full'">
+                        <thead>
+                            <tr class="border-b border-white/10">
+                                <th class="p-3 w-20 text-[9px] font-black text-zinc-500 uppercase sticky left-0 z-10 transition-colors bg-zinc-900/90">Zeit</th>
+                                <th v-for="idx in (showFullWeek ? [0,1,2,3,4,5,6] : [selectedDay])" :key="idx" class="p-3 text-[9px] font-black text-zinc-500 uppercase text-center border-l border-white/5" :class="{'text-blue-500': selectedDay === idx}">{{days[idx]}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="h in [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]" :key="h" class="border-b border-white/5 h-24">
+                                <td class="p-2 text-[10px] font-bold text-zinc-500 sticky left-0 z-10 transition-colors bg-zinc-900/90">{{h}}:00</td>
+                                <td v-for="idx in (showFullWeek ? [0,1,2,3,4,5,6] : [selectedDay])" :key="idx" 
+                                    @click="openAddModalAt(idx, h)"
+                                    class="p-1 border-l border-white/5 align-top active:bg-blue-500/5 transition-colors cursor-pointer">
+                                    <div v-for="task in getTasksByDayAndHour(idx, h)" :key="task.id" 
+                                         @click.stop="openEditModal(task)"
+                                         class="mb-1 p-2 rounded-xl bg-blue-600/20 border border-blue-500/30 text-[10px] relative transition-opacity"
+                                         :class="{'opacity-30': task.completed}">
+                                        <div class="font-bold truncate" :class="{'line-through': task.completed}">{{ task.title }}</div>
+                                        <!-- NOTIZEN IN SPALTENANSICHT -->
+                                        <div class="text-[8px] opacity-60 line-clamp-2 mt-0.5" v-if="task.description">{{ task.description }}</div>
+                                        <div @click.stop="toggleTask(task)" class="absolute top-1 right-1 w-4 h-4 rounded-full border border-white/30 flex items-center justify-center" :class="{'bg-blue-500 border-blue-500': task.completed}">
+                                            <svg v-if="task.completed" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" class="w-2.5 h-2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -309,12 +318,16 @@
             const activeTask = ref({ title: '', startTime: '', endTime: '', description: '' });
             const viewMode = ref(localStorage.getItem('focus_view_mode') || 'list');
             const isDark = ref(localStorage.getItem('focus_theme') !== 'light');
+            const showFullWeek = ref(false);
 
             const icons = () => nextTick(() => lucide.createIcons());
 
             const toggleView = () => {
                 if (viewMode.value === 'list') viewMode.value = 'table';
-                else if (viewMode.value === 'table') viewMode.value = 'weekly';
+                else if (viewMode.value === 'table') {
+                    viewMode.value = 'weekly';
+                    showFullWeek.value = false;
+                }
                 else viewMode.value = 'list';
                 localStorage.setItem('focus_view_mode', viewMode.value);
                 icons();
@@ -474,7 +487,7 @@
                 user, loginEmail, loginPassword, loading, handleLogin, handleLogout,
                 days, selectedDay, filteredTasks, currentFullDate, icons,
                 showModal, isEditing, activeTask, viewMode, toggleView, isDark, toggleTheme,
-                toggleTask, saveTask, openEditModal, openAddModal, openAddModalAt, closeModal, deleteTask, importWorkflow, getTasksByDayAndHour 
+                toggleTask, saveTask, openEditModal, openAddModal, openAddModalAt, closeModal, deleteTask, importWorkflow, getTasksByDayAndHour, showFullWeek 
             };
         }
     }).mount('#app');
