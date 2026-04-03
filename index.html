@@ -37,28 +37,27 @@
         .list-move, .list-enter-active, .list-leave-active { transition: all 0.4s ease; }
         .list-enter-from, .list-leave-to { opacity: 0; transform: translateY(15px); }
 
-        /* NEUES GOLD-WEISS DESIGN (LIGHT MODE) */
-        .light-mode { background-color: #ffffff !important; color: #000000 !important; min-height: 100vh; }
-        .light-mode .glass { background: rgba(245, 245, 247, 0.8) !important; border: 1px solid rgba(0,0,0,0.08) !important; color: #000000 !important; }
-        .light-mode input, .light-mode textarea { background: #f2f2f7 !important; color: #000000 !important; border: 1px solid rgba(0,0,0,0.05) !important; }
-        .light-mode .day-active { background-color: #D4AF37 !important; color: #ffffff !important; }
+        /* WEISS-GOLD-SCHWARZ DESIGN */
+        .light-mode { background-color: #ffffff !important; color: #000000 !important; }
+        .light-mode .glass { background: rgba(255, 255, 255, 0.9) !important; border: 1px solid rgba(212, 175, 55, 0.2) !important; color: #000000 !important; }
+        .light-mode input, .light-mode textarea { background: #f2f2f7 !important; color: #000000 !important; border: 1px solid rgba(0,0,0,0.1) !important; }
         
-        /* Gold-Ersetzungen für Blau */
-        .light-mode .bg-blue-600 { background-color: #D4AF37 !important; }
-        .light-mode .bg-blue-500 { background-color: #D4AF37 !important; }
+        /* Gold Akzente für Blau */
         .light-mode .text-blue-500, .light-mode .text-blue-600 { color: #D4AF37 !important; }
+        .light-mode .bg-blue-600, .light-mode .bg-blue-500 { background-color: #D4AF37 !important; }
         .light-mode .border-blue-500 { border-color: #D4AF37 !important; }
         .light-mode .shadow-blue-600\/20 { box-shadow: 0 10px 30px -5px rgba(212, 175, 55, 0.3) !important; }
         .light-mode .shadow-blue-600\/40 { box-shadow: 0 20px 40px -10px rgba(212, 175, 55, 0.5) !important; }
         .light-mode .bg-blue-600\/20 { background-color: rgba(212, 175, 55, 0.15) !important; }
         .light-mode .border-blue-500\/30 { border-color: rgba(212, 175, 55, 0.3) !important; }
 
-        /* Kontrast-Anpassungen */
-        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode p, .light-mode span { color: #000000 !important; }
-        .light-mode .text-zinc-400, .light-mode .text-zinc-500, .light-mode .text-zinc-700 { color: #555555 !important; }
-        .light-mode .text-white { color: #ffffff !important; }
+        /* Text & UI Anpassungen */
+        .light-mode .day-active { background-color: #D4AF37 !important; color: #ffffff !important; }
+        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode p, .light-mode td, .light-mode th { color: #000000 !important; }
+        .light-mode .text-zinc-400, .light-mode .text-zinc-500, .light-mode .text-zinc-700 { color: #333333 !important; }
+        .light-mode .text-white { color: #ffffff !important; } /* Text auf Gold-Buttons bleibt weiß */
         .light-mode header { background-color: rgba(255, 255, 255, 0.8) !important; }
-        .light-mode .bg-zinc-900\/90 { background-color: rgba(255, 255, 255, 0.95) !important; color: #000000 !important; }
+        .light-mode .bg-zinc-900\/90 { background-color: #ffffff !important; color: #000000 !important; }
         .light-mode .sticky { background-color: rgba(255, 255, 255, 0.95) !important; }
     </style>
 </head>
