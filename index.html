@@ -24,6 +24,7 @@
             color: #ffffff;
             -webkit-font-smoothing: antialiased;
             user-select: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         [v-cloak] { display: none; }
         .glass { background: rgba(28, 28, 30, 0.8); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1); }
@@ -35,14 +36,39 @@
         
         .list-move, .list-enter-active, .list-leave-active { transition: all 0.4s ease; }
         .list-enter-from, .list-leave-to { opacity: 0; transform: translateY(15px); }
+
+        /* WHITE-GOLD MODE REFINEMENT */
+        .light-mode { background-color: #ffffff !important; color: #000000 !important; }
+        .light-mode #app { background-color: #ffffff !important; color: #000000 !important; }
+        .light-mode .glass { background: rgba(0, 0, 0, 0.03) !important; border: 1px solid rgba(0,0,0,0.08) !important; color: #000000 !important; }
+        .light-mode input, .light-mode textarea { background: #f2f2f7 !important; color: #000000 !important; border: 1px solid rgba(0,0,0,0.05) !important; }
+        .light-mode .day-active { background-color: #D4AF37 !important; color: #ffffff !important; }
+        .light-mode .text-white { color: #ffffff !important; }
+        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode p, .light-mode td, .light-mode th { color: #000000 !important; }
+        .light-mode .text-zinc-400, .light-mode .text-zinc-500, .light-mode .text-zinc-600, .light-mode .text-zinc-700 { color: #000000 !important; opacity: 0.6; }
+        
+        /* Gold Accents for Light Mode */
+        .light-mode .text-blue-500 { color: #B8860B !important; }
+        .light-mode .bg-blue-600 { background-color: #D4AF37 !important; }
+        .light-mode .bg-blue-500 { background-color: #D4AF37 !important; }
+        .light-mode .border-blue-500 { border-color: #D4AF37 !important; }
+        .light-mode .bg-blue-600\/20 { background-color: rgba(212, 175, 55, 0.15) !important; }
+        .light-mode .border-blue-500\/30 { border-color: rgba(212, 175, 55, 0.3) !important; }
+        .light-mode .shadow-blue-600\/20 { shadow-color: rgba(212, 175, 55, 0.2) !important; }
+        .light-mode .shadow-blue-600\/40 { shadow-color: rgba(212, 175, 55, 0.4) !important; }
+        
+        .light-mode header { background-color: rgba(255, 255, 255, 0.8) !important; }
+        .light-mode .bg-black { background-color: #ffffff !important; }
+        .light-mode .bg-zinc-900\/90 { background-color: rgba(255, 255, 255, 0.95) !important; color: #000000 !important; }
+        .light-mode .sticky { background-color: rgba(255, 255, 255, 0.95) !important; }
     </style>
 </head>
-<body>
+<body :class="{ 'light-mode': !isDark }">
 
-<div id="app" v-cloak>
+<div id="app" v-cloak class="min-h-screen transition-colors">
     
     <!-- LOGIN -->
-    <div v-if="!user" class="min-h-screen flex items-center justify-center p-8 bg-black">
+    <div v-if="!user" class="min-h-screen flex items-center justify-center p-8 transition-colors">
         <div class="w-full max-w-sm">
             <div class="mb-10 text-center">
                 <div class="w-24 h-24 bg-blue-600 rounded-[2.2rem] flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-600/20 overflow-hidden">
@@ -66,15 +92,19 @@
     <div v-else class="max-w-xl mx-auto min-h-screen pb-32">
         
         <!-- NAVBAR -->
-        <header class="sticky top-0 z-40 bg-black/60 backdrop-blur-xl px-6 pt-14 pb-4 flex justify-between items-center">
+        <header class="sticky top-0 z-40 backdrop-blur-xl px-6 pt-14 pb-4 flex justify-between items-center transition-colors">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight">Übersicht</h1>
                 <p class="text-blue-500 font-bold text-xs uppercase tracking-widest mt-1">{{ currentFullDate }}</p>
             </div>
             <div class="flex gap-2">
+                <!-- THEME SWITCHER -->
+                <button @click="toggleTheme" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-400">
+                    <i :data-lucide="isDark ? 'sun' : 'moon'" class="w-5 h-5"></i>
+                </button>
                 <!-- VIEW SWITCHER -->
                 <button @click="toggleView" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-400">
-                    <i :data-lucide="viewMode === 'list' ? 'calendar' : 'layout-list'" class="w-5 h-5"></i>
+                    <i :data-lucide="viewMode === 'list' ? 'calendar' : (viewMode === 'table' ? 'grid' : 'layout-list')" class="w-5 h-5"></i>
                 </button>
                 <button @click="handleLogout" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-400">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
@@ -95,7 +125,7 @@
         <!-- TASKS CONTAINER -->
         <div class="px-6">
             
-            <div v-if="filteredTasks.length === 0" class="py-16 text-center glass rounded-[3rem] border-dashed border-2 border-white/5">
+            <div v-if="filteredTasks.length === 0 && viewMode !== 'weekly'" class="py-16 text-center glass rounded-[3rem] border-dashed border-2 border-white/5">
                 <i data-lucide="coffee" class="w-10 h-10 mx-auto mb-4 text-zinc-700"></i>
                 <p class="text-zinc-500 font-medium mb-8">Noch nichts geplant für {{ days[selectedDay] }}</p>
                 <button v-if="selectedDay < 5" @click="importWorkflow" class="bg-white text-black px-8 py-3 rounded-full font-bold text-sm active:scale-90 transition-all">
@@ -121,7 +151,7 @@
 
                         <div class="flex-grow min-w-0">
                             <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">{{ task.startTime }} — {{ task.endTime }}</span>
-                            <h3 class="font-bold text-[17px] text-white leading-tight" :class="{ 'line-through': task.completed }">
+                            <h3 class="font-bold text-[17px] leading-tight" :class="{ 'line-through': task.completed }">
                                 {{ task.title }}
                             </h3>
                             <p class="text-sm text-zinc-500 truncate mt-0.5">{{ task.description }}</p>
@@ -132,41 +162,87 @@
                 </transition-group>
             </div>
 
-            <!-- VIEW 2: TABLE/CALENDAR VIEW -->
-            <div v-else class="glass rounded-[2.2rem] overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-white/10">
-                            <th class="p-4 text-[10px] font-black text-zinc-500 uppercase">Zeit</th>
-                            <th class="p-4 text-[10px] font-black text-zinc-500 uppercase">Fokus-Block</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="task in filteredTasks" :key="task.id" @click="openEditModal(task)" 
-                            class="border-b border-white/5 active:bg-white/5 transition-colors"
-                            :class="{ 'opacity-30': task.completed }">
-                            <td class="p-4 align-top w-24">
-                                <div class="text-xs font-bold text-blue-500">{{ task.startTime }}</div>
-                                <div class="text-[9px] text-zinc-600 font-medium">{{ task.endTime }}</div>
-                            </td>
-                            <td class="p-4">
-                                <div class="flex items-start gap-3">
-                                    <div @click.stop="toggleTask(task)" 
-                                         class="w-5 h-5 mt-0.5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all"
-                                         :class="task.completed ? 'bg-blue-500 border-blue-500' : 'border-white/20'">
-                                        <svg v-if="task.completed" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" class="w-3 h-3">
-                                            <polyline points="20 6 9 17 4 12"></polyline>
-                                        </svg>
+            <!-- VIEW 2: TABLE/CALENDAR VIEW (SINGLE DAY) -->
+            <div v-else-if="viewMode === 'table'" class="space-y-4">
+                <div class="flex justify-end px-2">
+                    <button @click="viewMode = 'weekly'; showFullWeek = true; icons();" class="text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white px-5 py-2.5 rounded-full shadow-lg active:scale-95 transition-all">
+                        Ganze Woche
+                    </button>
+                </div>
+                <div class="glass rounded-[2.2rem] overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-white/10">
+                                <th class="p-4 text-[10px] font-black text-zinc-500 uppercase w-28">Zeit</th>
+                                <th class="p-4 text-[10px] font-black text-zinc-500 uppercase">Fokus-Block</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="task in filteredTasks" :key="task.id" @click="openEditModal(task)" 
+                                class="border-b border-white/5 active:bg-white/5 transition-colors"
+                                :class="{ 'opacity-30': task.completed }">
+                                <td class="p-4 align-top">
+                                    <div class="text-sm font-bold text-blue-500">{{ task.startTime }}</div>
+                                    <div class="text-[10px] text-zinc-600 font-medium">{{ task.endTime }}</div>
+                                </td>
+                                <td class="p-4">
+                                    <div class="flex items-start gap-3">
+                                        <div @click.stop="toggleTask(task)" 
+                                             class="w-6 h-6 mt-0.5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all"
+                                             :class="task.completed ? 'bg-blue-500 border-blue-500' : 'border-white/20'">
+                                            <svg v-if="task.completed" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" class="w-3.5 h-3.5">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="font-bold text-base leading-tight" :class="{ 'line-through': task.completed }">{{ task.title }}</div>
+                                            <div class="text-[11px] text-zinc-500 mt-1 whitespace-pre-line leading-snug">{{ task.description }}</div>
+                                        </div>
                                     </div>
-                                    <div class="min-w-0">
-                                        <div class="font-bold text-sm leading-tight" :class="{ 'line-through text-zinc-500': task.completed }">{{ task.title }}</div>
-                                        <div class="text-[11px] text-zinc-500 line-clamp-1 mt-1">{{ task.description }}</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW 3: WEEKLY FULL TABLE / SPALTENANSICHT -->
+            <div v-else-if="viewMode === 'weekly'" class="space-y-4">
+                <div class="flex justify-end px-2" v-if="!showFullWeek">
+                    <button @click="showFullWeek = true; icons();" class="text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white px-5 py-2.5 rounded-full shadow-lg active:scale-95 transition-all">
+                        Ganze Woche
+                    </button>
+                </div>
+                <div class="glass rounded-[2.2rem] overflow-x-auto no-scrollbar">
+                    <table class="w-full text-left border-collapse table-fixed" :class="showFullWeek ? 'min-w-[750px]' : 'min-w-full'">
+                        <thead>
+                            <tr class="border-b border-white/10">
+                                <th class="p-3 w-20 text-[9px] font-black text-zinc-500 uppercase sticky left-0 z-10 transition-colors bg-zinc-900/90">Zeit</th>
+                                <th v-for="idx in (showFullWeek ? [0,1,2,3,4,5,6] : [selectedDay])" :key="idx" class="p-3 text-[9px] font-black text-zinc-500 uppercase text-center border-l border-white/5" :class="{'text-blue-500': selectedDay === idx}">{{days[idx]}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="h in [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]" :key="h" class="border-b border-white/5 h-24">
+                                <td class="p-2 text-[10px] font-bold text-zinc-500 sticky left-0 z-10 transition-colors bg-zinc-900/90">{{h}}:00</td>
+                                <td v-for="idx in (showFullWeek ? [0,1,2,3,4,5,6] : [selectedDay])" :key="idx" 
+                                    @click="openAddModalAt(idx, h)"
+                                    class="p-1 border-l border-white/5 align-top active:bg-blue-500/5 transition-colors cursor-pointer">
+                                    <div v-for="task in getTasksByDayAndHour(idx, h)" :key="task.id" 
+                                         @click.stop="openEditModal(task)"
+                                         class="mb-1 p-2 rounded-xl bg-blue-600/20 border border-blue-500/30 text-[10px] relative transition-opacity"
+                                         :class="{'opacity-30': task.completed}">
+                                        <div class="font-bold truncate" :class="{'line-through': task.completed}">{{ task.title }}</div>
+                                        <!-- NOTIZEN IN SPALTENANSICHT -->
+                                        <div class="text-[8px] opacity-60 line-clamp-2 mt-0.5" v-if="task.description">{{ task.description }}</div>
+                                        <div @click.stop="toggleTask(task)" class="absolute top-1 right-1 w-4 h-4 rounded-full border border-white/30 flex items-center justify-center" :class="{'bg-blue-500 border-blue-500': task.completed}">
+                                            <svg v-if="task.completed" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" class="w-2.5 h-2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -180,7 +256,7 @@
     <!-- MODAL -->
     <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0">
         <div class="absolute inset-0 bg-black/90 backdrop-blur-md transition-opacity" @click="closeModal"></div>
-        <div class="relative bg-[#1C1C1E] w-full max-w-lg rounded-t-[3rem] sm:rounded-[3rem] p-8 border-t border-white/10 shadow-2xl transform transition-all">
+        <div class="relative w-full max-w-lg rounded-t-[3rem] sm:rounded-[3rem] p-8 border-t border-white/10 shadow-2xl transform transition-all glass">
             
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-2xl font-bold">{{ isEditing ? 'Bearbeiten' : 'Neuer Fokus' }}</h2>
@@ -251,12 +327,26 @@
             const showModal = ref(false);
             const isEditing = ref(false);
             const activeTask = ref({ title: '', startTime: '', endTime: '', description: '' });
-            const viewMode = ref('list');
+            const viewMode = ref(localStorage.getItem('focus_view_mode') || 'list');
+            const isDark = ref(localStorage.getItem('focus_theme') !== 'light');
+            const showFullWeek = ref(false);
 
             const icons = () => nextTick(() => lucide.createIcons());
 
             const toggleView = () => {
-                viewMode.value = viewMode.value === 'list' ? 'table' : 'list';
+                if (viewMode.value === 'list') viewMode.value = 'table';
+                else if (viewMode.value === 'table') {
+                    viewMode.value = 'weekly';
+                    showFullWeek.value = false;
+                }
+                else viewMode.value = 'list';
+                localStorage.setItem('focus_view_mode', viewMode.value);
+                icons();
+            };
+
+            const toggleTheme = () => {
+                isDark.value = !isDark.value;
+                localStorage.setItem('focus_theme', isDark.value ? 'dark' : 'light');
                 icons();
             };
 
@@ -286,7 +376,6 @@
             };
 
             const toggleTask = async (task) => {
-                // Vibration beim Abhaken
                 if ("vibrate" in navigator) navigator.vibrate(25);
                 const taskRef = doc(db, "tasks", task.id);
                 await updateDoc(taskRef, { completed: !task.completed });
@@ -295,6 +384,15 @@
             const openAddModal = () => {
                 isEditing.value = false;
                 activeTask.value = { title: '', startTime: '', endTime: '', description: '' };
+                showModal.value = true;
+                icons();
+            };
+
+            const openAddModalAt = (dayIdx, hour) => {
+                isEditing.value = false;
+                selectedDay.value = dayIdx;
+                const hStr = hour.toString().padStart(2, '0');
+                activeTask.value = { title: '', startTime: `${hStr}:00`, endTime: `${hStr}:45`, description: '' };
                 showModal.value = true;
                 icons();
             };
@@ -358,7 +456,6 @@
                 await batch.commit();
             };
 
-            // WÖCHENTLICHER RESET (ISO-Woche wechselt Mo 00:00)
             const checkReset = async () => {
                 const now = new Date();
                 const weekKey = `${now.getFullYear()}-${getWeek(now)}`;
@@ -391,13 +488,17 @@
                     .sort((a, b) => a.startTime.localeCompare(b.startTime));
             });
 
+            const getTasksByDayAndHour = (dayIdx, hour) => {
+                return tasks.value.filter(t => t.day === dayIdx && parseInt(t.startTime.split(':')[0]) === hour);
+            };
+
             const currentFullDate = computed(() => new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long' }).format(new Date()));
 
             return { 
                 user, loginEmail, loginPassword, loading, handleLogin, handleLogout,
-                days, selectedDay, filteredTasks, currentFullDate,
-                showModal, isEditing, activeTask, viewMode, toggleView,
-                toggleTask, saveTask, openEditModal, openAddModal, closeModal, deleteTask, importWorkflow 
+                days, selectedDay, filteredTasks, currentFullDate, icons,
+                showModal, isEditing, activeTask, viewMode, toggleView, isDark, toggleTheme,
+                toggleTask, saveTask, openEditModal, openAddModal, openAddModalAt, closeModal, deleteTask, importWorkflow, getTasksByDayAndHour, showFullWeek 
             };
         }
     }).mount('#app');
