@@ -37,21 +37,24 @@
         .list-move, .list-enter-active, .list-leave-active { transition: all 0.4s ease; }
         .list-enter-from, .list-leave-to { opacity: 0; transform: translateY(15px); }
 
-        /* GLOBAL LIGHT MODE */
+        /* GLOBAL LIGHT MODE REFINEMENT */
         .light-mode { background-color: #f2f2f7 !important; color: #000000 !important; }
-        .light-mode body { background-color: #f2f2f7 !important; }
-        .light-mode .glass { background: rgba(255, 255, 255, 0.7) !important; border: 1px solid rgba(0,0,0,0.1) !important; color: #000000 !important; }
+        .light-mode #app { background-color: #f2f2f7 !important; color: #000000 !important; }
+        .light-mode .glass { background: rgba(255, 255, 255, 0.8) !important; border: 1px solid rgba(0,0,0,0.1) !important; color: #000000 !important; }
         .light-mode input, .light-mode textarea { background: #ffffff !important; color: #000000 !important; border: 1px solid rgba(0,0,0,0.1) !important; }
         .light-mode .day-active { background-color: #000000 !important; color: #ffffff !important; }
         .light-mode .text-white { color: #000000 !important; }
-        .light-mode .text-zinc-400, .light-mode .text-zinc-500 { color: #666666 !important; }
+        .light-mode h1, .light-mode h2, .light-mode h3 { color: #000000 !important; }
+        .light-mode .text-zinc-400, .light-mode .text-zinc-500 { color: #555555 !important; }
         .light-mode header { background-color: rgba(242, 242, 247, 0.8) !important; }
-        .light-mode .bg-zinc-900\/90 { background-color: rgba(255, 255, 255, 0.9) !important; }
+        .light-mode .bg-black { background-color: #f2f2f7 !important; }
+        .light-mode .bg-zinc-900\/90 { background-color: rgba(255, 255, 255, 0.95) !important; color: #000000 !important; }
+        .light-mode .sticky { background-color: rgba(242, 242, 247, 0.95) !important; }
     </style>
 </head>
 <body :class="{ 'light-mode': !isDark }">
 
-<div id="app" v-cloak>
+<div id="app" v-cloak class="min-h-screen transition-colors">
     
     <!-- LOGIN -->
     <div v-if="!user" class="min-h-screen flex items-center justify-center p-8 transition-colors">
@@ -137,7 +140,7 @@
 
                         <div class="flex-grow min-w-0">
                             <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">{{ task.startTime }} — {{ task.endTime }}</span>
-                            <h3 class="font-bold text-[17px] leading-tight" :class="[{ 'line-through': task.completed }]">
+                            <h3 class="font-bold text-[17px] leading-tight" :class="{ 'line-through': task.completed }">
                                 {{ task.title }}
                             </h3>
                             <p class="text-sm text-zinc-500 truncate mt-0.5">{{ task.description }}</p>
@@ -151,7 +154,7 @@
             <!-- VIEW 2: TABLE/CALENDAR VIEW (SINGLE DAY) -->
             <div v-else-if="viewMode === 'table'" class="space-y-4">
                 <div class="flex justify-end px-2">
-                    <button @click="viewMode = 'weekly'" class="text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg active:scale-95 transition-all">
+                    <button @click="viewMode = 'weekly'; icons();" class="text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white px-5 py-2.5 rounded-full shadow-lg active:scale-95 transition-all">
                         Ganze Woche
                     </button>
                 </div>
@@ -181,7 +184,7 @@
                                             </svg>
                                         </div>
                                         <div class="min-w-0">
-                                            <div class="font-bold text-base leading-tight" :class="[{ 'line-through text-zinc-500': task.completed }]">{{ task.title }}</div>
+                                            <div class="font-bold text-base leading-tight" :class="{ 'line-through': task.completed }">{{ task.title }}</div>
                                             <div class="text-[11px] text-zinc-500 mt-1 whitespace-pre-line leading-snug">{{ task.description }}</div>
                                         </div>
                                     </div>
@@ -469,7 +472,7 @@
 
             return { 
                 user, loginEmail, loginPassword, loading, handleLogin, handleLogout,
-                days, selectedDay, filteredTasks, currentFullDate,
+                days, selectedDay, filteredTasks, currentFullDate, icons,
                 showModal, isEditing, activeTask, viewMode, toggleView, isDark, toggleTheme,
                 toggleTask, saveTask, openEditModal, openAddModal, openAddModalAt, closeModal, deleteTask, importWorkflow, getTasksByDayAndHour 
             };
