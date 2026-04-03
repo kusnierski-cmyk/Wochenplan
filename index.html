@@ -37,32 +37,40 @@
         .list-move, .list-enter-active, .list-leave-active { transition: all 0.4s ease; }
         .list-enter-from, .list-leave-to { opacity: 0; transform: translateY(15px); }
 
-        /* GOLD THEME LOGIC */
-        .light-mode { background-color: #ffffff !important; color: #000000 !important; min-height: 100vh; }
-        .light-mode .glass { background: rgba(0, 0, 0, 0.05) !important; border: 1px solid rgba(0,0,0,0.1) !important; color: #000000 !important; }
+        /* GLOBAL GOLD/WHITE MODE REFINEMENT */
+        .light-mode { background-color: #ffffff !important; color: #000000 !important; }
+        .light-mode #app { background-color: #ffffff !important; color: #000000 !important; }
+        .light-mode .glass { background: rgba(245, 245, 245, 0.9) !important; border: 1px solid rgba(0,0,0,0.1) !important; color: #000000 !important; }
         .light-mode input, .light-mode textarea { background: #f2f2f7 !important; color: #000000 !important; border: 1px solid rgba(0,0,0,0.1) !important; }
+        .light-mode .day-active { background-color: #000000 !important; color: #ffffff !important; }
         
-        /* Gold anstatt Blau */
-        .light-mode .text-blue-500 { color: #B8860B !important; } /* Dunkleres Gold für Textlesbarkeit */
-        .light-mode .bg-blue-600, .light-mode .bg-blue-500 { background-color: #D4AF37 !important; }
+        /* Gold Overrides für alle blauen Elemente */
+        .light-mode .bg-blue-600 { background-color: #D4AF37 !important; }
+        .light-mode .bg-blue-500 { background-color: #D4AF37 !important; }
+        .light-mode .text-blue-500, .light-mode .text-blue-600 { color: #D4AF37 !important; }
         .light-mode .border-blue-500 { border-color: #D4AF37 !important; }
+        .light-mode .shadow-blue-600\/20 { box-shadow: 0 10px 30px -5px rgba(212, 175, 55, 0.3) !important; }
+        .light-mode .shadow-blue-600\/40 { box-shadow: 0 20px 40px -10px rgba(212, 175, 55, 0.5) !important; }
         .light-mode .bg-blue-600\/20 { background-color: rgba(212, 175, 55, 0.15) !important; }
         .light-mode .border-blue-500\/30 { border-color: rgba(212, 175, 55, 0.3) !important; }
         
-        /* Kontraste */
-        .light-mode .day-active { background-color: #000000 !important; color: #ffffff !important; }
-        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode span { color: #000000 !important; }
-        .light-mode p, .light-mode .text-zinc-500, .light-mode .text-zinc-400, .light-mode .text-zinc-600 { color: #000000 !important; opacity: 0.8; }
-        .light-mode .text-white { color: #ffffff !important; } /* Für Icons in farbigen Buttons */
+        /* Kontrast-Anpassungen für Texte */
+        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode p, .light-mode span, .light-mode td, .light-mode th { color: #000000 !important; }
+        .light-mode .text-zinc-400, .light-mode .text-zinc-500, .light-mode .text-zinc-700 { color: #444444 !important; }
+        .light-mode .text-white { color: #ffffff !important; } /* Weißer Text auf Gold-Buttons bleibt weiß */
         
+        /* Weitere UI Elemente */
         .light-mode header { background-color: rgba(255, 255, 255, 0.8) !important; }
+        .light-mode .bg-black { background-color: #ffffff !important; }
+        .light-mode .bg-zinc-900\/90 { background-color: rgba(255, 255, 255, 0.95) !important; color: #000000 !important; }
         .light-mode .sticky { background-color: rgba(255, 255, 255, 0.95) !important; }
-        .light-mode .bg-zinc-900\/90 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        /* Re-Exception für Gold-Labels */
+        .light-mode .text-blue-500 { color: #D4AF37 !important; }
     </style>
 </head>
-<body>
+<body :class="{ 'light-mode': !isDark }">
 
-<div id="app" v-cloak :class="{ 'light-mode': !isDark }" class="min-h-screen transition-colors">
+<div id="app" v-cloak class="min-h-screen transition-colors">
     
     <!-- LOGIN -->
     <div v-if="!user" class="min-h-screen flex items-center justify-center p-8 transition-colors">
@@ -229,6 +237,7 @@
                                          class="mb-1 p-2 rounded-xl bg-blue-600/20 border border-blue-500/30 text-[10px] relative transition-opacity"
                                          :class="{'opacity-30': task.completed}">
                                         <div class="font-bold truncate" :class="{'line-through': task.completed}">{{ task.title }}</div>
+                                        <!-- NOTIZEN IN SPALTENANSICHT -->
                                         <div class="text-[8px] opacity-60 line-clamp-2 mt-0.5" v-if="task.description">{{ task.description }}</div>
                                         <div @click.stop="toggleTask(task)" class="absolute top-1 right-1 w-4 h-4 rounded-full border border-white/30 flex items-center justify-center" :class="{'bg-blue-500 border-blue-500': task.completed}">
                                             <svg v-if="task.completed" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" class="w-2.5 h-2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -331,7 +340,10 @@
 
             const toggleView = () => {
                 if (viewMode.value === 'list') viewMode.value = 'table';
-                else if (viewMode.value === 'table') { viewMode.value = 'weekly'; showFullWeek.value = false; }
+                else if (viewMode.value === 'table') {
+                    viewMode.value = 'weekly';
+                    showFullWeek.value = false;
+                }
                 else viewMode.value = 'list';
                 localStorage.setItem('focus_view_mode', viewMode.value);
                 icons();
@@ -349,39 +361,99 @@
                     if (u) loadData(u.uid);
                     icons();
                 });
+
+                window.addEventListener('click', () => {
+                    if ("vibrate" in navigator) navigator.vibrate(15);
+                });
+
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('sw.js').catch(() => {});
+                }
             });
 
             const loadData = (uid) => {
                 const q = query(collection(db, "tasks"), where("uid", "==", uid));
                 onSnapshot(q, (snapshot) => {
                     tasks.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    checkReset();
                     icons();
                 });
             };
 
             const toggleTask = async (task) => {
+                if ("vibrate" in navigator) navigator.vibrate(25);
                 const taskRef = doc(db, "tasks", task.id);
                 await updateDoc(taskRef, { completed: !task.completed });
             };
 
-            const openAddModal = () => { isEditing.value = false; activeTask.value = { title: '', startTime: '', endTime: '', description: '' }; showModal.value = true; icons(); };
-            const openEditModal = (task) => { isEditing.value = true; activeTask.value = { ...task }; showModal.value = true; icons(); };
-            const openAddModalAt = (dayIdx, hour) => { isEditing.value = false; selectedDay.value = dayIdx; const hStr = hour.toString().padStart(2, '0'); activeTask.value = { title: '', startTime: `${hStr}:00`, endTime: `${hStr}:45`, description: '' }; showModal.value = true; icons(); };
-            const closeModal = () => { showModal.value = false; isEditing.value = false; };
+            const openAddModal = () => {
+                isEditing.value = false;
+                activeTask.value = { title: '', startTime: '', endTime: '', description: '' };
+                showModal.value = true;
+                icons();
+            };
+
+            const openAddModalAt = (dayIdx, hour) => {
+                isEditing.value = false;
+                selectedDay.value = dayIdx;
+                const hStr = hour.toString().padStart(2, '0');
+                activeTask.value = { title: '', startTime: `${hStr}:00`, endTime: `${hStr}:45`, description: '' };
+                showModal.value = true;
+                icons();
+            };
+
+            const openEditModal = (task) => {
+                isEditing.value = true;
+                activeTask.value = { ...task };
+                showModal.value = true;
+                icons();
+            };
+
+            const closeModal = () => {
+                showModal.value = false;
+                isEditing.value = false;
+            };
 
             const saveTask = async () => {
                 loading.value = true;
                 try {
-                    if (isEditing.value) { const { id, ...data } = activeTask.value; await updateDoc(doc(db, "tasks", id), data); }
-                    else { await addDoc(collection(db, "tasks"), { ...activeTask.value, day: selectedDay.value, uid: user.value.uid, completed: false }); }
+                    if (isEditing.value) {
+                        const { id, ...data } = activeTask.value;
+                        await updateDoc(doc(db, "tasks", id), data);
+                    } else {
+                        await addDoc(collection(db, "tasks"), {
+                            ...activeTask.value,
+                            day: selectedDay.value,
+                            uid: user.value.uid,
+                            completed: false
+                        });
+                    }
                     closeModal();
-                } finally { loading.value = false; }
+                } finally {
+                    loading.value = false;
+                }
             };
 
-            const deleteTask = async () => { if (confirm("Löschen?")) { await deleteDoc(doc(db, "tasks", activeTask.value.id)); closeModal(); } };
+            const deleteTask = async () => {
+                if (confirm("Diesen Fokus-Block löschen?")) {
+                    await deleteDoc(doc(db, "tasks", activeTask.value.id));
+                    closeModal();
+                }
+            };
+
             const importWorkflow = async () => {
                 const batch = writeBatch(db);
-                const flow = [{ t: "FOKUS", s: "09:00", e: "10:00", d: "Start" }];
+                const flow = [
+                    { t: "☕ LIFE-ADMIN", s: "09:00", e: "10:00", d: "• Wohnungssuche\n• Jobcenter\n• Telefonate, E-Mails" },
+                    { t: "🧠 FOKUSBLOCK 1: Deep Work", s: "10:00", e: "12:00", d: "• Kundenprojekte\n• Höchste Priorität" },
+                    { t: "🎬 FOKUSBLOCK 2: Content Creation", s: "12:00", e: "13:00", d: "• Long Format Video\n• Skripten & Aufnehmen" },
+                    { t: "🥗 RECHARGE & HEALTH", s: "13:00", e: "14:00", d: "• Mittagspause\n• Sport / Workout" },
+                    { t: "📈 FOKUSBLOCK 3: Business Dev", s: "14:00", e: "15:30", d: "• CRM pflegen\n• Strategie & Finanzen" },
+                    { t: "☕ Pause & Setup", s: "15:30", e: "16:00", d: "• Setup vorbereiten" },
+                    { t: "🎙️ FOKUSBLOCK 4: Recording", s: "16:00", e: "17:00", d: "• 1 Min Videos (Batch)" },
+                    { t: "✂️ FOKUSBLOCK 5: Post-Produktion", s: "17:00", e: "18:30", d: "• CapCut Schnitt" },
+                    { t: "🚀 FOKUSBLOCK 6: Distribution", s: "18:30", e: "19:00", d: "• Upload TikTok, Insta, YT" }
+                ];
                 flow.forEach(item => {
                     const dRef = doc(collection(db, "tasks"));
                     batch.set(dRef, { title: item.t, startTime: item.s, endTime: item.e, description: item.d, day: selectedDay.value, uid: user.value.uid, completed: false });
@@ -389,21 +461,49 @@
                 await batch.commit();
             };
 
+            const checkReset = async () => {
+                const now = new Date();
+                const weekKey = `${now.getFullYear()}-${getWeek(now)}`;
+                if (localStorage.getItem('focus_reset') !== weekKey) {
+                    const batch = writeBatch(db);
+                    tasks.value.forEach(t => { if (t.completed) batch.update(doc(db, "tasks", t.id), { completed: false }); });
+                    await batch.commit();
+                    localStorage.setItem('focus_reset', weekKey);
+                }
+            };
+
+            function getWeek(d) {
+                d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+                d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+                return Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7);
+            }
+
             const handleLogin = async () => {
                 loading.value = true;
                 try { await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value); }
-                catch (e) { alert(e.message); }
+                catch (e) { alert("Fehler: " + e.message); }
                 finally { loading.value = false; }
             };
 
             const handleLogout = () => signOut(auth);
-            const filteredTasks = computed(() => tasks.value.filter(t => t.day === selectedDay.value).sort((a, b) => a.startTime.localeCompare(b.startTime)));
-            const getTasksByDayAndHour = (dayIdx, hour) => tasks.value.filter(t => t.day === dayIdx && parseInt(t.startTime.split(':')[0]) === hour);
+
+            const filteredTasks = computed(() => {
+                return tasks.value
+                    .filter(t => t.day === selectedDay.value)
+                    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+            });
+
+            const getTasksByDayAndHour = (dayIdx, hour) => {
+                return tasks.value.filter(t => t.day === dayIdx && parseInt(t.startTime.split(':')[0]) === hour);
+            };
+
             const currentFullDate = computed(() => new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long' }).format(new Date()));
 
             return { 
-                user, loginEmail, loginPassword, loading, handleLogin, handleLogout, days, selectedDay, filteredTasks, currentFullDate, icons,
-                showModal, isEditing, activeTask, viewMode, toggleView, isDark, toggleTheme, toggleTask, saveTask, openEditModal, openAddModal, openAddModalAt, closeModal, deleteTask, importWorkflow, getTasksByDayAndHour, showFullWeek 
+                user, loginEmail, loginPassword, loading, handleLogin, handleLogout,
+                days, selectedDay, filteredTasks, currentFullDate, icons,
+                showModal, isEditing, activeTask, viewMode, toggleView, isDark, toggleTheme,
+                toggleTask, saveTask, openEditModal, openAddModal, openAddModalAt, closeModal, deleteTask, importWorkflow, getTasksByDayAndHour, showFullWeek 
             };
         }
     }).mount('#app');
