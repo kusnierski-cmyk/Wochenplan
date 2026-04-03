@@ -5,309 +5,164 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FocusFlow Pro</title>
     
-    <!-- PWA META -->
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    <!-- Apple Home Screen Icon -->
     <link rel="apple-touch-icon" href="worklogo.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
+        :root { --accent: #2563eb; --bg: #000000; --text: #ffffff; }
+        
         body { 
-            font-family: 'Inter', -apple-system, system-ui, sans-serif;
-            background-color: #000000;
-            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: all 0.3s ease;
             -webkit-font-smoothing: antialiased;
             user-select: none;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            margin: 0;
         }
         [v-cloak] { display: none; }
+        
         .glass { background: rgba(28, 28, 30, 0.8); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1); }
         .day-active { background-color: #ffffff !important; color: #000000 !important; }
-        .task-card { transition: transform 0.2s ease, opacity 0.3s ease; }
-        .task-card:active { transform: scale(0.97); }
-        input, textarea { background: #2c2c2e !important; border: none !important; color: white !important; -webkit-appearance: none; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        .list-move, .list-enter-active, .list-leave-active { transition: all 0.4s ease; }
-        .list-enter-from, .list-leave-to { opacity: 0; transform: translateY(15px); }
 
-        /* WEISS-GOLD MODUS */
-        #app.light-mode {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-        }
+        /* WEISS-GOLD MODUS LOGIK */
+        .light-mode { --bg: #ffffff; --text: #000000; --accent: #D4AF37; }
         
         .light-mode .glass { 
             background: rgba(245, 245, 247, 0.8) !important; 
-            border: 1px solid rgba(0,0,0,0.1) !important; 
+            border: 1px solid rgba(0,0,0,0.08) !important; 
             color: #000000 !important; 
         }
 
-        .light-mode input, .light-mode textarea { 
-            background: #f2f2f7 !important; 
-            color: #000000 !important; 
-            border: 1px solid rgba(0,0,0,0.05) !important; 
-        }
-
-        /* Gold-Färbung: Alles was Blau ist wird Gold (#D4AF37) */
-        .light-mode .text-blue-500, 
-        .light-mode .text-blue-600 { color: #D4AF37 !important; }
+        /* Gold-Transformation für alle blauen Elemente */
+        .light-mode .text-blue-500, .light-mode .text-blue-600 { color: var(--accent) !important; }
+        .light-mode .bg-blue-600, .light-mode .bg-blue-500 { background-color: var(--accent) !important; }
+        .light-mode .border-blue-500, .light-mode .border-blue-600 { border-color: var(--accent) !important; }
         
-        .light-mode .bg-blue-600, 
-        .light-mode .bg-blue-500 { background-color: #D4AF37 !important; }
-        
-        .light-mode .border-blue-500 { border-color: #D4AF37 !important; }
-        
-        .light-mode .bg-blue-600\/20 { background-color: rgba(212, 175, 55, 0.2) !important; }
-        .light-mode .border-blue-500\/30 { border-color: rgba(212, 175, 55, 0.4) !important; }
-        .light-mode .shadow-blue-600\/20 { box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.2) !important; }
+        /* Schatten in Gold */
         .light-mode .shadow-blue-600\/40 { box-shadow: 0 20px 25px -5px rgba(212, 175, 55, 0.4) !important; }
-
-        /* Text-Anpassungen für Kontrast */
-        .light-mode h1, .light-mode h2, .light-mode h3, .light-mode p, .light-mode td, .light-mode th { color: #000000 !important; }
-        .light-mode .text-zinc-500, .light-mode .text-zinc-400, .light-mode .text-zinc-700 { color: #444444 !important; }
-        .light-mode .text-white { color: #ffffff !important; } /* Text in Gold-Buttons bleibt weiß */
-
-        /* UI Overrides */
-        .light-mode header { background-color: rgba(255, 255, 255, 0.8) !important; }
+        .light-mode .shadow-blue-600\/20 { box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.2) !important; }
+        
+        /* Spezial-Elemente im Light Mode */
+        .light-mode .bg-blue-600\/20 { background-color: rgba(212, 175, 55, 0.15) !important; }
         .light-mode .day-active { background-color: #000000 !important; color: #ffffff !important; }
-        .light-mode .sticky { background-color: rgba(255, 255, 255, 0.95) !important; }
-        .light-mode .bg-zinc-900\/90 { background-color: #ffffff !important; color: #000000 !important; }
+        .light-mode input, .light-mode textarea { background: #f2f2f7 !important; color: #000000 !important; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .task-card { transition: transform 0.2s ease, opacity 0.3s ease; }
+        .task-card:active { transform: scale(0.98); }
     </style>
 </head>
-<body>
+<body :class="{ 'light-mode': !isDark }">
 
-<div id="app" v-cloak :class="{ 'light-mode': !isDark }" class="min-h-screen transition-colors">
+<div id="app" v-cloak>
     
-    <!-- LOGIN -->
-    <div v-if="!user" class="min-h-screen flex items-center justify-center p-8 transition-colors">
-        <div class="w-full max-sm:max-w-sm">
-            <div class="mb-10 text-center">
-                <div class="w-24 h-24 bg-blue-600 rounded-[2.2rem] flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-600/20 overflow-hidden">
-                    <img src="worklogo.png" alt="Logo" class="w-full h-full object-cover">
-                </div>
-                <h1 class="text-4xl font-bold tracking-tight">FocusFlow</h1>
-                <p class="text-zinc-500 mt-2">Personal Workflow Engine</p>
+    <!-- LOGIN SEITE -->
+    <div v-if="!user" class="min-h-screen flex items-center justify-center p-8">
+        <div class="w-full max-w-sm text-center">
+            <div class="w-24 h-24 bg-blue-600 rounded-[2.2rem] flex items-center justify-center mx-auto mb-6 shadow-2xl overflow-hidden">
+                <img src="worklogo.png" alt="Logo" class="w-full h-full object-cover">
             </div>
-            
-            <form @submit.prevent="handleLogin" class="space-y-4">
-                <input type="email" v-model="loginEmail" placeholder="E-Mail" class="w-full p-5 rounded-2xl outline-none text-lg">
-                <input type="password" v-model="loginPassword" placeholder="Passwort" class="w-full p-5 rounded-2xl outline-none text-lg">
-                <button type="submit" :disabled="loading" class="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-xl active:scale-95 transition-all disabled:opacity-50">
-                    System starten
-                </button>
+            <h1 class="text-4xl font-bold tracking-tight mb-8">FocusFlow</h1>
+            <form @submit.prevent="handleLogin" class="space-y-4 text-left">
+                <input type="email" v-model="loginEmail" placeholder="E-Mail" class="w-full p-5 rounded-2xl outline-none text-lg bg-zinc-900 border-none">
+                <input type="password" v-model="loginPassword" placeholder="Passwort" class="w-full p-5 rounded-2xl outline-none text-lg bg-zinc-900 border-none">
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-xl active:scale-95 transition-all">System starten</button>
             </form>
         </div>
     </div>
 
     <!-- MAIN APP -->
     <div v-else class="max-w-xl mx-auto min-h-screen pb-32">
-        
-        <!-- NAVBAR -->
         <header class="sticky top-0 z-40 backdrop-blur-xl px-6 pt-14 pb-4 flex justify-between items-center transition-colors">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight">Übersicht</h1>
                 <p class="text-blue-500 font-bold text-xs uppercase tracking-widest mt-1">{{ currentFullDate }}</p>
             </div>
             <div class="flex gap-2">
-                <!-- THEME SWITCHER -->
-                <button @click="toggleTheme" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-400">
+                <button @click="toggleTheme" class="w-10 h-10 rounded-full glass flex items-center justify-center">
                     <i :data-lucide="isDark ? 'sun' : 'moon'" class="w-5 h-5"></i>
                 </button>
-                <!-- VIEW SWITCHER -->
-                <button @click="toggleView" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-400">
-                    <i :data-lucide="viewMode === 'list' ? 'calendar' : (viewMode === 'table' ? 'grid' : 'layout-list')" class="w-5 h-5"></i>
-                </button>
-                <button @click="handleLogout" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-400">
+                <button @click="handleLogout" class="w-10 h-10 rounded-full glass flex items-center justify-center text-zinc-500">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                 </button>
             </div>
         </header>
 
-        <!-- DAY SELECTOR -->
+        <!-- TAGES SELECTOR -->
         <div class="flex overflow-x-auto gap-2 px-6 py-5 no-scrollbar">
-            <button v-for="(day, index) in days" :key="index" 
-                    @click="selectedDay = index"
+            <button v-for="(day, index) in days" :key="index" @click="selectedDay = index"
                     class="flex-shrink-0 px-6 py-2.5 rounded-full text-sm font-bold glass transition-all"
                     :class="{ 'day-active': selectedDay === index }">
                 {{ day }}
             </button>
         </div>
 
-        <!-- TASKS CONTAINER -->
-        <div class="px-6">
+        <!-- TASKS LISTE -->
+        <div class="px-6 space-y-4">
+            <div v-for="task in filteredTasks" :key="task.id" @click="openEditModal(task)"
+                 class="task-card glass rounded-[2.2rem] p-5 flex items-center gap-5 shadow-lg"
+                 :class="{ 'opacity-40': task.completed }">
+                
+                <div @click.stop="toggleTask(task)" 
+                     class="w-9 h-9 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all duration-300"
+                     :class="task.completed ? 'bg-blue-500 border-blue-500' : 'border-white/20'">
+                    <svg v-if="task.completed" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" class="w-5 h-5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+
+                <div class="flex-grow">
+                    <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">{{ task.startTime }} — {{ task.endTime }}</span>
+                    <h3 class="font-bold text-[17px] leading-tight" :class="{ 'line-through': task.completed }">{{ task.title }}</h3>
+                </div>
+                <i data-lucide="chevron-right" class="w-5 h-5 opacity-20"></i>
+            </div>
             
-            <div v-if="filteredTasks.length === 0 && viewMode !== 'weekly'" class="py-16 text-center glass rounded-[3rem] border-dashed border-2 border-white/5">
-                <i data-lucide="coffee" class="w-10 h-10 mx-auto mb-4 text-zinc-700"></i>
-                <p class="text-zinc-500 font-medium mb-8">Noch nichts geplant für {{ days[selectedDay] }}</p>
-                <button v-if="selectedDay < 5" @click="importWorkflow" class="bg-white text-black px-8 py-3 rounded-full font-bold text-sm active:scale-90 transition-all">
-                    Workflow laden
-                </button>
-            </div>
-
-            <!-- VIEW 1: CLASSIC LIST -->
-            <div v-else-if="viewMode === 'list'" class="space-y-4">
-                <transition-group name="list">
-                    <div v-for="task in filteredTasks" :key="task.id" 
-                         @click="openEditModal(task)"
-                         class="task-card glass rounded-[2.2rem] p-5 flex items-center gap-5 shadow-2xl"
-                         :class="{ 'opacity-40': task.completed }">
-                        
-                        <div @click.stop="toggleTask(task)" 
-                             class="w-9 h-9 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all duration-300"
-                             :class="task.completed ? 'bg-blue-500 border-blue-500' : 'border-white/20'">
-                            <svg v-if="task.completed" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                        </div>
-
-                        <div class="flex-grow min-w-0">
-                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">{{ task.startTime }} — {{ task.endTime }}</span>
-                            <h3 class="font-bold text-[17px] leading-tight" :class="{ 'line-through': task.completed }">
-                                {{ task.title }}
-                            </h3>
-                            <p class="text-sm text-zinc-500 truncate mt-0.5">{{ task.description }}</p>
-                        </div>
-
-                        <i data-lucide="chevron-right" class="w-5 h-5 text-zinc-700 flex-shrink-0"></i>
-                    </div>
-                </transition-group>
-            </div>
-
-            <!-- VIEW 2: TABLE/CALENDAR VIEW (SINGLE DAY) -->
-            <div v-else-if="viewMode === 'table'" class="space-y-4">
-                <div class="flex justify-end px-2">
-                    <button @click="viewMode = 'weekly'; showFullWeek = true; icons();" class="text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white px-5 py-2.5 rounded-full shadow-lg active:scale-95 transition-all">
-                        Ganze Woche
-                    </button>
-                </div>
-                <div class="glass rounded-[2.2rem] overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-white/10">
-                                <th class="p-4 text-[10px] font-black text-zinc-500 uppercase w-28">Zeit</th>
-                                <th class="p-4 text-[10px] font-black text-zinc-500 uppercase">Fokus-Block</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="task in filteredTasks" :key="task.id" @click="openEditModal(task)" 
-                                class="border-b border-white/5 active:bg-white/5 transition-colors"
-                                :class="{ 'opacity-30': task.completed }">
-                                <td class="p-4 align-top">
-                                    <div class="text-sm font-bold text-blue-500">{{ task.startTime }}</div>
-                                    <div class="text-[10px] text-zinc-600 font-medium">{{ task.endTime }}</div>
-                                </td>
-                                <td class="p-4">
-                                    <div class="flex items-start gap-3">
-                                        <div @click.stop="toggleTask(task)" 
-                                             class="w-6 h-6 mt-0.5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all"
-                                             :class="task.completed ? 'bg-blue-500 border-blue-500' : 'border-white/20'">
-                                            <svg v-if="task.completed" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" class="w-3.5 h-3.5">
-                                                <polyline points="20 6 9 17 4 12"></polyline>
-                                            </svg>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <div class="font-bold text-base leading-tight" :class="{ 'line-through': task.completed }">{{ task.title }}</div>
-                                            <div class="text-[11px] text-zinc-500 mt-1 whitespace-pre-line leading-snug">{{ task.description }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- VIEW 3: WEEKLY FULL TABLE / SPALTENANSICHT -->
-            <div v-else-if="viewMode === 'weekly'" class="space-y-4">
-                <div class="flex justify-end px-2" v-if="!showFullWeek">
-                    <button @click="showFullWeek = true; icons();" class="text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white px-5 py-2.5 rounded-full shadow-lg active:scale-95 transition-all">
-                        Ganze Woche
-                    </button>
-                </div>
-                <div class="glass rounded-[2.2rem] overflow-x-auto no-scrollbar">
-                    <table class="w-full text-left border-collapse table-fixed" :class="showFullWeek ? 'min-w-[750px]' : 'min-w-full'">
-                        <thead>
-                            <tr class="border-b border-white/10">
-                                <th class="p-3 w-20 text-[9px] font-black text-zinc-500 uppercase sticky left-0 z-10 transition-colors bg-zinc-900/90">Zeit</th>
-                                <th v-for="idx in (showFullWeek ? [0,1,2,3,4,5,6] : [selectedDay])" :key="idx" class="p-3 text-[9px] font-black text-zinc-500 uppercase text-center border-l border-white/5" :class="{'text-blue-500': selectedDay === idx}">{{days[idx]}}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="h in [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]" :key="h" class="border-b border-white/5 h-24">
-                                <td class="p-2 text-[10px] font-bold text-zinc-500 sticky left-0 z-10 transition-colors bg-zinc-900/90">{{h}}:00</td>
-                                <td v-for="idx in (showFullWeek ? [0,1,2,3,4,5,6] : [selectedDay])" :key="idx" 
-                                    @click="openAddModalAt(idx, h)"
-                                    class="p-1 border-l border-white/5 align-top active:bg-blue-500/5 transition-colors cursor-pointer">
-                                    <div v-for="task in getTasksByDayAndHour(idx, h)" :key="task.id" 
-                                         @click.stop="openEditModal(task)"
-                                         class="mb-1 p-2 rounded-xl bg-blue-600/20 border border-blue-500/30 text-[10px] relative transition-opacity"
-                                         :class="{'opacity-30': task.completed}">
-                                        <div class="font-bold truncate" :class="{'line-through': task.completed}">{{ task.title }}</div>
-                                        <!-- NOTIZEN IN SPALTENANSICHT -->
-                                        <div class="text-[8px] opacity-60 line-clamp-2 mt-0.5" v-if="task.description">{{ task.description }}</div>
-                                        <div @click.stop="toggleTask(task)" class="absolute top-1 right-1 w-4 h-4 rounded-full border border-white/30 flex items-center justify-center" :class="{'bg-blue-500 border-blue-500': task.completed}">
-                                            <svg v-if="task.completed" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" class="w-2.5 h-2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div v-if="filteredTasks.length === 0" class="text-center py-20 opacity-40 glass rounded-[2.2rem]">
+                <p class="font-medium">Keine Fokus-Blöcke geplant.</p>
+                <button @click="importWorkflow" class="mt-4 text-blue-500 font-bold text-sm uppercase tracking-widest">Workflow laden</button>
             </div>
         </div>
 
-        <!-- FLOATING ADD BUTTON -->
-        <button @click="openAddModal" class="fixed bottom-10 right-8 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-2xl shadow-blue-600/40 active:scale-90 transition-all z-50">
-            <i data-lucide="plus" class="w-9 h-9 text-white"></i>
+        <!-- FLOATING PLUS BUTTON -->
+        <button @click="openAddModal" class="fixed bottom-10 right-8 w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-2xl shadow-blue-600/40 active:scale-90 transition-all z-50">
+            <i data-lucide="plus" class="w-9 h-9"></i>
         </button>
-
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL FÜR EDIT/ADD -->
     <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-md transition-opacity" @click="closeModal"></div>
-        <div class="relative w-full max-w-lg rounded-t-[3rem] sm:rounded-[3rem] p-8 border-t border-white/10 shadow-2xl transform transition-all glass">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" @click="closeModal"></div>
+        <div class="relative w-full max-w-lg glass rounded-t-[3rem] p-8 space-y-6 transform transition-all shadow-2xl">
+            <h2 class="text-2xl font-bold">{{ isEditing ? 'Block bearbeiten' : 'Neuer Fokus-Block' }}</h2>
             
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-bold">{{ isEditing ? 'Bearbeiten' : 'Neuer Fokus' }}</h2>
-                <button v-if="isEditing" @click="deleteTask" class="text-red-500 p-2"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+            <div class="space-y-4">
+                <input v-model="activeTask.title" placeholder="Was willst du erreichen?" class="w-full p-5 rounded-2xl outline-none bg-zinc-900">
+                
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase ml-2 mb-1 block">Start</label>
+                        <input v-model="activeTask.startTime" type="time" class="w-full p-4 rounded-2xl bg-zinc-900 border-none">
+                    </div>
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase ml-2 mb-1 block">Ende</label>
+                        <input v-model="activeTask.endTime" type="time" class="w-full p-4 rounded-2xl bg-zinc-900 border-none">
+                    </div>
+                </div>
+
+                <textarea v-model="activeTask.description" placeholder="Notizen / Details..." class="w-full p-5 rounded-2xl bg-zinc-900 h-32 resize-none"></textarea>
             </div>
 
-            <form @submit.prevent="saveTask" class="space-y-6">
-                <div>
-                    <label class="text-[10px] font-black text-zinc-500 uppercase ml-4 mb-2 block">Bezeichnung</label>
-                    <input v-model="activeTask.title" placeholder="Block Name" required class="w-full p-5 rounded-[1.5rem] outline-none text-xl font-semibold">
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] font-black text-zinc-500 uppercase ml-4 mb-2 block">Start</label>
-                        <input v-model="activeTask.startTime" type="time" required class="w-full p-5 rounded-[1.5rem] outline-none text-center font-bold">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-black text-zinc-500 uppercase ml-4 mb-2 block">Ende</label>
-                        <input v-model="activeTask.endTime" type="time" required class="w-full p-5 rounded-[1.5rem] outline-none text-center font-bold">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-[10px] font-black text-zinc-500 uppercase ml-4 mb-2 block">Notizen</label>
-                    <textarea v-model="activeTask.description" placeholder="Stichpunkte..." class="w-full p-5 rounded-[1.5rem] outline-none h-32 resize-none text-base"></textarea>
-                </div>
-
-                <div class="flex gap-4">
-                    <button type="button" @click="closeModal" class="flex-1 bg-zinc-800 text-white font-bold py-5 rounded-[1.5rem] active:scale-95 transition-all">Abbrechen</button>
-                    <button type="submit" class="flex-[2] bg-white text-black font-bold py-5 rounded-[1.5rem] active:scale-95 transition-all">Sichern</button>
-                </div>
-            </form>
+            <div class="flex gap-4">
+                <button v-if="isEditing" @click="deleteTask" class="flex-1 py-5 bg-red-500/10 text-red-500 rounded-2xl font-bold active:scale-95 transition-all">Löschen</button>
+                <button @click="saveTask" class="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-all">Speichern</button>
+            </div>
         </div>
     </div>
 
@@ -336,166 +191,74 @@
     createApp({
         setup() {
             const user = ref(null);
-            const loading = ref(false);
-            const loginEmail = ref('');
-            const loginPassword = ref('');
+            const isDark = ref(localStorage.getItem('focus_theme') !== 'light');
             const tasks = ref([]);
-            const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
             const selectedDay = ref(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
+            const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
             const showModal = ref(false);
             const isEditing = ref(false);
-            const activeTask = ref({ title: '', startTime: '', endTime: '', description: '' });
-            const viewMode = ref(localStorage.getItem('focus_view_mode') || 'list');
-            const isDark = ref(localStorage.getItem('focus_theme') !== 'light');
-            const showFullWeek = ref(false);
+            const activeTask = ref({});
+            const loginEmail = ref('');
+            const loginPassword = ref('');
 
-            const icons = () => nextTick(() => lucide.createIcons());
-
-            const toggleView = () => {
-                if (viewMode.value === 'list') viewMode.value = 'table';
-                else if (viewMode.value === 'table') {
-                    viewMode.value = 'weekly';
-                    showFullWeek.value = false;
-                }
-                else viewMode.value = 'list';
-                localStorage.setItem('focus_view_mode', viewMode.value);
-                icons();
-            };
+            const updateIcons = () => nextTick(() => lucide.createIcons());
 
             const toggleTheme = () => {
                 isDark.value = !isDark.value;
                 localStorage.setItem('focus_theme', isDark.value ? 'dark' : 'light');
-                icons();
+                updateIcons();
             };
 
             onMounted(() => {
                 onAuthStateChanged(auth, (u) => {
                     user.value = u;
                     if (u) loadData(u.uid);
-                    icons();
+                    updateIcons();
                 });
-
-                window.addEventListener('click', () => {
-                    if ("vibrate" in navigator) navigator.vibrate(15);
-                });
-
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('sw.js').catch(() => {});
-                }
             });
 
             const loadData = (uid) => {
                 const q = query(collection(db, "tasks"), where("uid", "==", uid));
                 onSnapshot(q, (snapshot) => {
                     tasks.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    checkReset();
-                    icons();
+                    checkWeeklyReset(); // RESET PRÜFUNG
+                    updateIcons();
                 });
+            };
+
+            // WOCHEN-RESET (Von Sonntag auf Montag 00:00 Uhr)
+            const checkWeeklyReset = async () => {
+                const now = new Date();
+                // ISO-Wochen-Key (z.B. "2023-W42")
+                const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+                d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+                const weekKey = `${d.getUTCFullYear()}-W${Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7)}`;
+
+                const lastReset = localStorage.getItem('focus_reset_week');
+
+                if (lastReset !== weekKey) {
+                    const batch = writeBatch(db);
+                    let hasChanges = false;
+                    tasks.value.forEach(t => {
+                        if (t.completed) {
+                            batch.update(doc(db, "tasks", t.id), { completed: false });
+                            hasChanges = true;
+                        }
+                    });
+                    if (hasChanges) await batch.commit();
+                    localStorage.setItem('focus_reset_week', weekKey);
+                    console.log("Reset durchgeführt: Neue Woche!");
+                }
             };
 
             const toggleTask = async (task) => {
                 if ("vibrate" in navigator) navigator.vibrate(25);
-                const taskRef = doc(db, "tasks", task.id);
-                await updateDoc(taskRef, { completed: !task.completed });
+                await updateDoc(doc(db, "tasks", task.id), { completed: !task.completed });
             };
-
-            const openAddModal = () => {
-                isEditing.value = false;
-                activeTask.value = { title: '', startTime: '', endTime: '', description: '' };
-                showModal.value = true;
-                icons();
-            };
-
-            const openAddModalAt = (dayIdx, hour) => {
-                isEditing.value = false;
-                selectedDay.value = dayIdx;
-                const hStr = hour.toString().padStart(2, '0');
-                activeTask.value = { title: '', startTime: `${hStr}:00`, endTime: `${hStr}:45`, description: '' };
-                showModal.value = true;
-                icons();
-            };
-
-            const openEditModal = (task) => {
-                isEditing.value = true;
-                activeTask.value = { ...task };
-                showModal.value = true;
-                icons();
-            };
-
-            const closeModal = () => {
-                showModal.value = false;
-                isEditing.value = false;
-            };
-
-            const saveTask = async () => {
-                loading.value = true;
-                try {
-                    if (isEditing.value) {
-                        const { id, ...data } = activeTask.value;
-                        await updateDoc(doc(db, "tasks", id), data);
-                    } else {
-                        await addDoc(collection(db, "tasks"), {
-                            ...activeTask.value,
-                            day: selectedDay.value,
-                            uid: user.value.uid,
-                            completed: false
-                        });
-                    }
-                    closeModal();
-                } finally {
-                    loading.value = false;
-                }
-            };
-
-            const deleteTask = async () => {
-                if (confirm("Diesen Fokus-Block löschen?")) {
-                    await deleteDoc(doc(db, "tasks", activeTask.value.id));
-                    closeModal();
-                }
-            };
-
-            const importWorkflow = async () => {
-                const batch = writeBatch(db);
-                const flow = [
-                    { t: "☕ LIFE-ADMIN", s: "09:00", e: "10:00", d: "• Wohnungssuche\n• Jobcenter\n• Telefonate, E-Mails" },
-                    { t: "🧠 FOKUSBLOCK 1: Deep Work", s: "10:00", e: "12:00", d: "• Kundenprojekte\n• Höchste Priorität" },
-                    { t: "🎬 FOKUSBLOCK 2: Content Creation", s: "12:00", e: "13:00", d: "• Long Format Video\n• Skripten & Aufnehmen" },
-                    { t: "🥗 RECHARGE & HEALTH", s: "13:00", e: "14:00", d: "• Mittagspause\n• Sport / Workout" },
-                    { t: "📈 FOKUSBLOCK 3: Business Dev", s: "14:00", e: "15:30", d: "• CRM pflegen\n• Strategie & Finanzen" },
-                    { t: "☕ Pause & Setup", s: "15:30", e: "16:00", d: "• Setup vorbereiten" },
-                    { t: "🎙️ FOKUSBLOCK 4: Recording", s: "16:00", e: "17:00", d: "• 1 Min Videos (Batch)" },
-                    { t: "✂️ FOKUSBLOCK 5: Post-Produktion", s: "17:00", e: "18:30", d: "• CapCut Schnitt" },
-                    { t: "🚀 FOKUSBLOCK 6: Distribution", s: "18:30", e: "19:00", d: "• Upload TikTok, Insta, YT" }
-                ];
-                flow.forEach(item => {
-                    const dRef = doc(collection(db, "tasks"));
-                    batch.set(dRef, { title: item.t, startTime: item.s, endTime: item.e, description: item.d, day: selectedDay.value, uid: user.value.uid, completed: false });
-                });
-                await batch.commit();
-            };
-
-            const checkReset = async () => {
-                const now = new Date();
-                const weekKey = `${now.getFullYear()}-${getWeek(now)}`;
-                if (localStorage.getItem('focus_reset') !== weekKey) {
-                    const batch = writeBatch(db);
-                    tasks.value.forEach(t => { if (t.completed) batch.update(doc(db, "tasks", t.id), { completed: false }); });
-                    await batch.commit();
-                    localStorage.setItem('focus_reset', weekKey);
-                }
-            };
-
-            function getWeek(d) {
-                d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-                d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-                return Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7);
-            }
 
             const handleLogin = async () => {
-                loading.value = true;
                 try { await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value); }
-                catch (e) { alert("Fehler: " + e.message); }
-                finally { loading.value = false; }
+                catch (e) { alert("Login-Daten inkorrekt."); }
             };
 
             const handleLogout = () => signOut(auth);
@@ -506,17 +269,63 @@
                     .sort((a, b) => a.startTime.localeCompare(b.startTime));
             });
 
-            const getTasksByDayAndHour = (dayIdx, hour) => {
-                return tasks.value.filter(t => t.day === dayIdx && parseInt(t.startTime.split(':')[0]) === hour);
+            const openAddModal = () => {
+                isEditing.value = false;
+                activeTask.value = { title: '', startTime: '09:00', endTime: '10:00', description: '' };
+                showModal.value = true;
+                updateIcons();
+            };
+
+            const openEditModal = (task) => {
+                isEditing.value = true;
+                activeTask.value = { ...task };
+                showModal.value = true;
+                updateIcons();
+            };
+
+            const saveTask = async () => {
+                if (isEditing.value) {
+                    const { id, ...data } = activeTask.value;
+                    await updateDoc(doc(db, "tasks", id), data);
+                } else {
+                    await addDoc(collection(db, "tasks"), {
+                        ...activeTask.value,
+                        day: selectedDay.value,
+                        uid: user.value.uid,
+                        completed: false
+                    });
+                }
+                showModal.value = false;
+            };
+
+            const deleteTask = async () => {
+                if (confirm("Block wirklich löschen?")) {
+                    await deleteDoc(doc(db, "tasks", activeTask.value.id));
+                    showModal.value = false;
+                }
+            };
+
+            const importWorkflow = async () => {
+                const batch = writeBatch(db);
+                const standard = [
+                    { t: "Deep Work Block", s: "09:00", e: "11:30" },
+                    { t: "Meeting / Calls", s: "13:00", e: "14:30" },
+                    { t: "Admin & E-Mails", s: "16:00", e: "17:00" }
+                ];
+                standard.forEach(item => {
+                    const dRef = doc(collection(db, "tasks"));
+                    batch.set(dRef, { title: item.t, startTime: item.s, endTime: item.e, day: selectedDay.value, uid: user.value.uid, completed: false });
+                });
+                await batch.commit();
             };
 
             const currentFullDate = computed(() => new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long' }).format(new Date()));
 
             return { 
-                user, loginEmail, loginPassword, loading, handleLogin, handleLogout,
-                days, selectedDay, filteredTasks, currentFullDate, icons,
-                showModal, isEditing, activeTask, viewMode, toggleView, isDark, toggleTheme,
-                toggleTask, saveTask, openEditModal, openAddModal, openAddModalAt, closeModal, deleteTask, importWorkflow, getTasksByDayAndHour, showFullWeek 
+                user, isDark, toggleTheme, tasks, selectedDay, days, filteredTasks, 
+                showModal, isEditing, activeTask, saveTask, openEditModal, openAddModal, 
+                closeModal: () => showModal.value = false, deleteTask, toggleTask,
+                handleLogin, handleLogout, loginEmail, loginPassword, currentFullDate, importWorkflow 
             };
         }
     }).mount('#app');
